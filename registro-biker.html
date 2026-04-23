@@ -448,12 +448,20 @@
 <div class="success-panel" id="success-panel">
   <div class="success-card">
     <div class="success-icon">✅</div>
-    <div class="success-title">¡FICHA CREADA!</div>
+    <div class="success-title">¡FICHA REGISTRADA!</div>
     <div class="success-text">
-      Tu perfil de emergencia está listo. Copia esta URL y escríbela en tu tag NFC. También guarda el QR de respaldo.
+      Tus datos han sido guardados correctamente en el sistema de Moteros Unidos.
     </div>
-    <div class="url-box" id="result-url">tusitio.com/biker/...</div>
-    <button class="copy-btn" onclick="copyURL()">COPIAR URL</button>
+    <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.35);border-radius:4px;padding:22px 18px;margin-bottom:6px;text-align:center;">
+      <div style="font-size:38px;margin-bottom:12px;">🏍️</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:18px;color:var(--gold-light);letter-spacing:1.5px;line-height:1.5;text-transform:uppercase;">
+        Comunícate con tu presidente<br>para solicitar tu etiqueta
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:10px;line-height:1.7;">
+        Tu ficha de emergencia ya está lista.<br>
+        El presidente del club la activará y te entregará tu tag NFC personalizado.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -464,6 +472,7 @@
 const SUPABASE_URL = 'https://borrwckzjmnvzfbprvfk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvcnJ3Y2t6am1udnpmYnBydmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTQwNTQsImV4cCI6MjA5MjQ3MDA1NH0.7mmsdqazcg608u2XYA8nz7xU9-cSR11LZwBHbVy93kM';
 const SITE_URL     = 'https://moterosunidos.com';  // tu dominio
+
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -587,20 +596,10 @@ async function submitForm() {
   }
 
   // ── Éxito ──
-  const profileUrl = `${SITE_URL}/biker/${bikerId}`;
-  document.getElementById('result-url').textContent = profileUrl;
   document.getElementById('main-form').style.display = 'none';
   document.getElementById('submit-section').style.display = 'none';
   document.getElementById('success-panel').style.display = 'block';
   setStatus('');
-}
-
-function copyURL() {
-  const url = document.getElementById('result-url').textContent;
-  navigator.clipboard.writeText(url).then(() => {
-    setStatus('¡URL copiada al portapapeles!', 'loading');
-    setTimeout(() => setStatus(''), 2000);
-  });
 }
 </script>
 </body>
