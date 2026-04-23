@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moteros Unidos — Registro de Emergencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dark: #8B6914;
+    --red: #C0392B;
+    --green: #1E7A3A;
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface2: #1C1C1C;
+    --border: rgba(201,168,76,0.25);
+    --text: #F0EAD6;
+    --text-muted: #8A8070;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 35% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,168,76,0.02) 60px, rgba(201,168,76,0.02) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,168,76,0.02) 60px, rgba(201,168,76,0.02) 61px);
+    padding-bottom: 60px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 32px 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .logo-wrap { margin-bottom: 10px; }
+  .logo-wrap img { width: 80px; height: 80px; object-fit: contain; }
+  .club-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .sub-name {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .form-badge {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 5px 16px;
+    border-radius: 2px;
+  }
+
+  /* FORM CONTAINER */
+  .form-container {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .section-header {
+    background: rgba(201,168,76,0.08);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 18px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .section-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* FIELD */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Oswald', sans-serif;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    background: var(--surface2);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--gold);
+  }
+  .field select option { background: #1C1C1C; }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* PHOTO UPLOAD */
+  .photo-upload {
+    border: 2px dashed rgba(201,168,76,0.3);
+    border-radius: 4px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .photo-upload:hover { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+  .photo-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-text { font-family: 'Oswald', sans-serif; font-size: 13px; color: var(--gold); letter-spacing: 1px; }
+  .upload-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .photo-preview {
+    display: none;
+    width: 100px;
+    height: 100px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    margin: 0 auto;
+  }
+
+  /* CHIPS (alergias/enfermedades) */
+  .chip-input-wrap { display: flex; gap: 8px; }
+  .chip-input-wrap input { flex: 1; }
+  .chip-add-btn {
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .chip-add-btn:hover { background: rgba(201,168,76,0.1); }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 10px; }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-family: 'Oswald', sans-serif;
+  }
+  .chip-danger { background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.5); color: #E8847B; }
+  .chip-warning { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35); color: var(--gold-light); }
+  .chip-info { background: rgba(30,122,58,0.15); border: 1px solid rgba(30,122,58,0.4); color: #5DBF7A; }
+  .chip-remove { cursor: pointer; opacity: 0.7; font-size: 14px; line-height: 1; }
+  .chip-remove:hover { opacity: 1; }
+
+  /* FIELD GRID */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* SUBMIT */
+  .submit-section { padding: 0 16px; max-width: 520px; margin: 0 auto; }
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .submit-btn:hover { background: var(--gold-light); }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* SUCCESS */
+  .success-panel {
+    display: none;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  .success-card {
+    background: var(--surface);
+    border: 1px solid rgba(30,122,58,0.5);
+    border-radius: 4px;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .success-icon { font-size: 48px; margin-bottom: 14px; }
+  .success-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    color: #5DBF7A;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .success-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
+  .url-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 16px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    color: var(--gold-light);
+    word-break: break-all;
+    margin-bottom: 16px;
+  }
+  .copy-btn {
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: rgba(201,168,76,0.1); }
+
+  /* STATUS MSG */
+  .status-msg {
+    max-width: 520px;
+    margin: 12px auto 0;
+    padding: 0 16px;
+    font-size: 13px;
+    text-align: center;
+    min-height: 20px;
+    color: var(--text-muted);
+  }
+  .status-msg.error { color: #E8847B; }
+  .status-msg.loading { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-wrap">
+    <!-- Reemplazar con la ruta real del logo -->
+    <img src="logoSF.png" alt="Moteros Unidos">
+  </div>
+  <div class="club-name">Moteros Unidos</div>
+  <div class="sub-name">Estado de México</div>
+  <div class="form-badge">REGISTRO DE EMERGENCIA</div>
+</div>
+
+<div class="form-container" id="main-form">
+
+  <!-- FOTO -->
+  <div class="form-section">
+    <div class="section-header">📷 Foto de identificación</div>
+    <div class="section-body">
+      <div class="photo-upload" id="photo-upload-area">
+        <input type="file" accept="image/*" id="photo-input" onchange="previewPhoto(this)">
+        <img class="photo-preview" id="photo-preview" alt="Preview">
+        <div id="upload-placeholder">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">Seleccionar foto</div>
+          <div class="upload-sub">JPG, PNG — Máx. 5MB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATOS PERSONALES -->
+  <div class="form-section">
+    <div class="section-header">👤 Datos personales</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nombre completo *</label>
+        <input type="text" id="nombre" placeholder="Ej. Juan Carlos Reyes Morales" required>
+      </div>
+      <div class="field">
+        <label>Apodo / Nickname</label>
+        <input type="text" id="apodo" placeholder='Ej. "El Rayo"'>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Fecha de nacimiento *</label>
+          <input type="date" id="fecha_nac" required>
+        </div>
+        <div class="field">
+          <label>Sexo *</label>
+          <select id="sexo" required>
+            <option value="">Seleccionar</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Peso (kg)</label>
+          <input type="number" id="peso" placeholder="Ej. 80" min="30" max="250">
+        </div>
+        <div class="field">
+          <label>Estatura (m)</label>
+          <input type="number" id="estatura" placeholder="Ej. 1.74" step="0.01" min="1" max="2.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>CURP</label>
+        <input type="text" id="curp" placeholder="Opcional" maxlength="18" style="text-transform:uppercase">
+      </div>
+    </div>
+  </div>
+
+  <!-- DATOS MÉDICOS -->
+  <div class="form-section">
+    <div class="section-header">🩸 Información médica</div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field">
+          <label>Tipo de sangre *</label>
+          <select id="tipo_sangre" required>
+            <option value="">Seleccionar</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>¿Donador?</label>
+          <select id="donador">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ALERGIAS -->
+      <div class="field">
+        <label>Alergias</label>
+        <div class="chip-input-wrap">
+          <input type="text" id="alergia-input" placeholder="Ej. Penicilina" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('alergias','chip-danger')}">
+          <button class="chip-add-btn" onclick="addChip('alergias','chip-danger')">+ AÑADIR</button>
+        </div>
+        <div class="chip-list" id="alergias-list"></div>
+      </div>
+
+      <!-- ENFERMEDADES -->
+      <div class="field">
+        <label>Condiciones médicas / Enfermedades</label>
+        <div class="chip-input-wrap">
+          <input type="text" id="enfermedad-input" placeholder="Ej. Diabetes tipo 2" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('enfermedades','chip-info')}">
+          <button class="chip-add-btn" onclick="addChip('enfermedades','chip-info')">+ AÑADIR</button>
+        </div>
+        <div class="chip-list" id="enfermedades-list"></div>
+      </div>
+
+      <!-- MEDICAMENTOS -->
+      <div class="field">
+        <label>Medicamentos actuales</label>
+        <div class="chip-input-wrap">
+          <input type="text" id="medicamento-input" placeholder="Ej. Metformina 500mg" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('medicamentos','chip-warning')}">
+          <button class="chip-add-btn" onclick="addChip('medicamentos','chip-warning')">+ AÑADIR</button>
+        </div>
+        <div class="chip-list" id="medicamentos-list"></div>
+      </div>
+
+      <div class="field">
+        <label>Nota para el paramédico</label>
+        <textarea id="nota_paramedico" placeholder="Cualquier información adicional importante para quien preste ayuda de emergencia..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACTO EMERGENCIA -->
+  <div class="form-section">
+    <div class="section-header">📞 Contacto de emergencia</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nombre del familiar *</label>
+        <input type="text" id="familiar_nombre" placeholder="Ej. María Reyes (esposa)" required>
+      </div>
+      <div class="field">
+        <label>Teléfono WhatsApp del familiar *</label>
+        <input type="tel" id="familiar_tel" placeholder="+52 722 123 4567" required>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTO CLUB -->
+  <div class="form-section">
+    <div class="section-header">🏍 Moto Club</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nombre del club</label>
+        <input type="text" id="club_nombre" value="Moteros Unidos EDOMEX">
+      </div>
+      <div class="field">
+        <label>Teléfono WhatsApp del club *</label>
+        <input type="tel" id="club_tel" placeholder="+52 722 987 6543" required>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS & SUBMIT -->
+<div class="status-msg" id="status-msg"></div>
+<div class="submit-section" id="submit-section" style="margin-top:16px;">
+  <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+    GENERAR MI FICHA DE EMERGENCIA
+  </button>
+</div>
+
+<!-- ÉXITO -->
+<div class="success-panel" id="success-panel">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-title">¡FICHA CREADA!</div>
+    <div class="success-text">
+      Tu perfil de emergencia está listo. Copia esta URL y escríbela en tu tag NFC. También guarda el QR de respaldo.
+    </div>
+    <div class="url-box" id="result-url">tusitio.com/biker/...</div>
+    <button class="copy-btn" onclick="copyURL()">COPIAR URL</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIGURACIÓN — reemplaza con tus datos reales
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://borrwckzjmnvzfbprvfk.supabase.co';
+const SUPABASE_KEY = 'sb_secret_cMGfoowxR2TJI_LChZdUsA_kcUgvqXM';
+const SITE_URL     = 'https://moterosunidos.com';  // tu dominio
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── CHIPS ───────────────────────────────────
+const chips = { alergias: [], enfermedades: [], medicamentos: [] };
+
+function addChip(type, styleClass) {
+  const inputId = type === 'alergias' ? 'alergia-input'
+                : type === 'enfermedades' ? 'enfermedad-input'
+                : 'medicamento-input';
+  const input = document.getElementById(inputId);
+  const val = input.value.trim();
+  if (!val) return;
+  chips[type].push(val);
+  const list = document.getElementById(`${type}-list`);
+  const chip = document.createElement('div');
+  chip.className = `chip ${styleClass}`;
+  chip.innerHTML = `${val} <span class="chip-remove" onclick="removeChip('${type}',${chips[type].length-1},this.parentElement)">×</span>`;
+  list.appendChild(chip);
+  input.value = '';
+}
+
+function removeChip(type, idx, el) {
+  chips[type].splice(idx, 1);
+  el.remove();
+}
+
+// ─── FOTO PREVIEW ─────────────────────────────
+function previewPhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('photo-preview');
+      prev.src = e.target.result;
+      prev.style.display = 'block';
+      document.getElementById('upload-placeholder').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────
+function setStatus(msg, type='') {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+}
+
+function generateId() {
+  return Math.random().toString(36).substring(2, 9);
+}
+
+// ─── SUBMIT ──────────────────────────────────
+async function submitForm() {
+  // Validación básica
+  const required = ['nombre','tipo_sangre','familiar_nombre','familiar_tel','club_tel'];
+  for (const id of required) {
+    if (!document.getElementById(id).value.trim()) {
+      setStatus(`Por favor completa el campo: ${id.replace('_',' ')}`, 'error');
+      return;
+    }
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  setStatus('Guardando tu ficha...', 'loading');
+
+  const bikerId = generateId();
+  let fotoUrl = null;
+
+  // ── Subir foto a Supabase Storage ──
+  const fotoFile = document.getElementById('photo-input').files[0];
+  if (fotoFile) {
+    const { data: uploadData, error: uploadError } = await sb
+      .storage.from('fotos-bikers')
+      .upload(`${bikerId}.jpg`, fotoFile, { contentType: fotoFile.type, upsert: true });
+    if (!uploadError) {
+      const { data: urlData } = sb.storage.from('fotos-bikers').getPublicUrl(`${bikerId}.jpg`);
+      fotoUrl = urlData.publicUrl;
+    }
+  }
+
+  // ── Calcular edad ──
+  const fechaNac = document.getElementById('fecha_nac').value;
+  let edad = null;
+  if (fechaNac) {
+    const hoy = new Date();
+    const nac = new Date(fechaNac);
+    edad = hoy.getFullYear() - nac.getFullYear();
+  }
+
+  // ── Insertar en tabla bikers ──
+  const { error } = await sb.from('bikers').insert({
+    id:              bikerId,
+    nombre:          document.getElementById('nombre').value.trim(),
+    apodo:           document.getElementById('apodo').value.trim(),
+    fecha_nac:       fechaNac || null,
+    edad:            edad,
+    sexo:            document.getElementById('sexo').value,
+    peso:            parseFloat(document.getElementById('peso').value) || null,
+    estatura:        parseFloat(document.getElementById('estatura').value) || null,
+    curp:            document.getElementById('curp').value.toUpperCase().trim() || null,
+    tipo_sangre:     document.getElementById('tipo_sangre').value,
+    donador:         document.getElementById('donador').value === 'si',
+    alergias:        chips.alergias,
+    enfermedades:    chips.enfermedades,
+    medicamentos:    chips.medicamentos,
+    nota_paramedico: document.getElementById('nota_paramedico').value.trim() || null,
+    familiar_nombre: document.getElementById('familiar_nombre').value.trim(),
+    familiar_tel:    document.getElementById('familiar_tel').value.trim(),
+    club_nombre:     document.getElementById('club_nombre').value.trim(),
+    club_tel:        document.getElementById('club_tel').value.trim(),
+    foto_url:        fotoUrl,
+  });
+
+  if (error) {
+    setStatus('Error al guardar: ' + error.message, 'error');
+    btn.disabled = false;
+    return;
+  }
+
+  // ── Éxito ──
+  const profileUrl = `${SITE_URL}/biker/${bikerId}`;
+  document.getElementById('result-url').textContent = profileUrl;
+  document.getElementById('main-form').style.display = 'none';
+  document.getElementById('submit-section').style.display = 'none';
+  document.getElementById('success-panel').style.display = 'block';
+  setStatus('');
+}
+
+function copyURL() {
+  const url = document.getElementById('result-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    setStatus('¡URL copiada al portapapeles!', 'loading');
+    setTimeout(() => setStatus(''), 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moteros Unidos — Perfil de Emergencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dark: #8B6914;
+    --red: #C0392B;
+    --green: #1E7A3A;
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface2: #1C1C1C;
+    --border: rgba(201,168,76,0.25);
+    --text: #F0EAD6;
+    --text-muted: #8A8070;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,168,76,0.02) 60px, rgba(201,168,76,0.02) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,168,76,0.02) 60px, rgba(201,168,76,0.02) 61px);
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 28px 20px 0;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 18px auto 0;
+  }
+  .club-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .emergency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--red);
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 5px 16px;
+    border-radius: 2px;
+    margin-top: 10px;
+    animation: pulse-badge 2s infinite;
+  }
+  @keyframes pulse-badge {
+    0%,100% { opacity:1; }
+    50% { opacity:0.75; }
+  }
+  .dot { width:8px; height:8px; background:#fff; border-radius:50%; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+  /* PROFILE CARD */
+  .profile-card {
+    max-width: 480px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+  }
+
+  .photo-section {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 4px 0 0;
+    border-bottom: none;
+    position: relative;
+  }
+  .photo-frame {
+    width: 90px;
+    height: 90px;
+    border-radius: 3px;
+    border: 2px solid var(--gold);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .photo-frame img { width:100%; height:100%; object-fit:cover; }
+  .photo-placeholder {
+    font-size: 36px;
+    opacity: 0.3;
+  }
+  .name-block { flex: 1; }
+  .biker-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1.1;
+  }
+  .biker-alias {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .biker-club {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* CRITICAL INFO — tipo sangre arriba grande */
+  .blood-banner {
+    background: var(--red);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .blood-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.7);
+  }
+  .blood-type {
+    font-family: 'Oswald', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .donor-tag {
+    font-size: 11px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+  }
+
+  /* INFO SECTIONS */
+  .info-sections {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+  }
+  .section {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 13px;
+    padding: 4px 11px;
+    border-radius: 2px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  .tag-danger {
+    background: rgba(192,57,43,0.2);
+    border: 1px solid rgba(192,57,43,0.5);
+    color: #E8847B;
+  }
+  .tag-warning {
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.35);
+    color: var(--gold-light);
+  }
+  .tag-info {
+    background: rgba(30,122,58,0.15);
+    border: 1px solid rgba(30,122,58,0.4);
+    color: #5DBF7A;
+  }
+  .tag-neutral {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-muted);
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 3px 0;
+  }
+  .info-row .key { color: var(--text-muted); font-size: 13px; }
+  .info-row .val { color: var(--text); font-weight: 500; }
+  .none-text { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  /* NOTA PARAMÉDICO */
+  .paramedic-note {
+    max-width: 480px;
+    margin: 12px auto 0;
+    padding: 0 16px;
+  }
+  .note-box {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .note-box strong { color: var(--gold); font-family: 'Oswald', sans-serif; letter-spacing: 1px; }
+
+  /* ALERT BUTTON */
+  .alert-section {
+    max-width: 480px;
+    margin: 20px auto 0;
+    padding: 0 16px 40px;
+  }
+  .alert-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .alert-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+  }
+  .alert-btn:hover { background: #A93226; }
+  .alert-btn:active { transform: scale(0.98); }
+  .alert-icon { font-size: 20px; }
+
+  .alert-sub {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+  }
+  .modal-icon { font-size: 40px; margin-bottom: 14px; }
+  .modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 22px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .btn-confirm {
+    flex: 2;
+    padding: 12px;
+    background: var(--red);
+    border: none;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 0 20px 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    opacity: 0.5;
+  }
+  .footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="club-name">Moteros Unidos · Estado de México</div>
+  <div class="emergency-badge">
+    <div class="dot"></div>
+    FICHA DE EMERGENCIA
+  </div>
+</div>
+
+<!-- PROFILE CARD -->
+<div class="profile-card">
+  <div class="photo-section">
+    <div class="photo-frame">
+      <!-- Reemplazar src con la foto real del biker desde Supabase -->
+      <div class="photo-placeholder">🏍</div>
+      <!-- <img src="URL_FOTO_BIKER" alt="Foto del biker"> -->
+    </div>
+    <div class="name-block">
+      <div class="biker-name">Juan Carlos Reyes</div>
+      <div class="biker-alias">Conocido como: "El Rayo"</div>
+      <div class="biker-club">Moteros Unidos · EDOMEX</div>
+    </div>
+  </div>
+
+  <div class="blood-banner">
+    <div>
+      <div class="blood-label">TIPO DE SANGRE</div>
+      <div class="blood-type">O+</div>
+    </div>
+    <div class="donor-tag">DONADOR</div>
+  </div>
+
+  <div class="info-sections">
+
+    <div class="section">
+      <div class="section-title">⚠ Alergias</div>
+      <div class="tag-list">
+        <span class="tag tag-danger">Penicilina</span>
+        <span class="tag tag-danger">Sulfas</span>
+        <span class="tag tag-danger">Látex</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💊 Medicamentos actuales</div>
+      <div class="tag-list">
+        <span class="tag tag-warning">Metformina 500mg</span>
+        <span class="tag tag-warning">Losartán 50mg</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏥 Condiciones médicas</div>
+      <div class="tag-list">
+        <span class="tag tag-info">Diabetes tipo 2</span>
+        <span class="tag tag-info">Hipertensión</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📋 Datos generales</div>
+      <div class="info-row"><span class="key">Edad</span><span class="val">38 años</span></div>
+      <div class="info-row"><span class="key">Peso</span><span class="val">82 kg</span></div>
+      <div class="info-row"><span class="key">Estatura</span><span class="val">1.74 m</span></div>
+      <div class="info-row"><span class="key">CURP</span><span class="val">REJC850312HMCYNS02</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📞 Contacto de emergencia</div>
+      <div class="info-row"><span class="key">Nombre</span><span class="val">María Reyes (esposa)</span></div>
+      <div class="info-row"><span class="key">Teléfono</span><span class="val">+52 722 123 4567</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏍 Moto Club</div>
+      <div class="info-row"><span class="key">Club</span><span class="val">Moteros Unidos EDOMEX</span></div>
+      <div class="info-row"><span class="key">Contacto</span><span class="val">+52 722 987 6543</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NOTA PARAMÉDICO -->
+<div class="paramedic-note">
+  <div class="note-box">
+    <strong>NOTA PARA PARAMÉDICO:</strong><br>
+    Verificar niveles de glucosa. Paciente diabético puede presentar alteraciones de conciencia por hipoglucemia. Evitar uso de látex en procedimientos.
+  </div>
+</div>
+
+<!-- BOTÓN DE ALERTA -->
+<div class="alert-section">
+  <button class="alert-btn" onclick="document.getElementById('modal').classList.add('active')">
+    <span class="alert-icon">🚨</span>
+    ALERTAR A SU FAMILIA
+  </button>
+  <div class="alert-sub">
+    Enviará ubicación actual + alerta de accidente<br>a familiar y moto club vía WhatsApp
+  </div>
+</div>
+
+<div class="footer">MOTEROS UNIDOS · ESTADO DE MÉXICO · <span>Sistema de Emergencia</span></div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon">🚨</div>
+    <div class="modal-title">Confirmar alerta</div>
+    <div class="modal-text">
+      Se enviará un mensaje de emergencia con la ubicación actual a la familia y moto club de <strong style="color:var(--text)">Juan Carlos Reyes</strong>.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('active')">CANCELAR</button>
+      <a class="btn-confirm" id="whatsapp-link" href="#" target="_blank">
+        ENVIAR ALERTA
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Obtener ubicación y armar link de WhatsApp ──
+  // Número de Make/WhatsApp Gateway (reemplazar con el tuyo)
+  const WHATSAPP_NUMBER = "5215535977497";
+  const BIKER_NAME = "Juan Carlos Reyes";
+
+  document.querySelector('.alert-btn').addEventListener('click', function() {
+    document.getElementById('modal').classList.add('active');
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+        const msg = encodeURIComponent(
+          `🚨 *ALERTA DE ACCIDENTE*\n\n` +
+          `El motero *${BIKER_NAME}* ha tenido un accidente y necesita ayuda.\n\n` +
+          `📍 *Ubicación:*\n${mapsLink}\n\n` +
+          `🩸 Tipo de sangre: O+\n` +
+          `⚠️ Alergias: Penicilina, Sulfas, Látex\n\n` +
+          `_Moteros Unidos Estado de México — Sistema de Emergencia_`
+        );
+        document.getElementById('whatsapp-link').href =
+          `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+      }, function() {
+        // Si no hay ubicación disponible
+        const msg = encodeURIComponent(
+          `🚨 *ALERTA DE ACCIDENTE*\n\n` +
+          `El motero *${BIKER_NAME}* ha tenido un accidente y necesita ayuda.\n\n` +
+          `📍 Ubicación no disponible. Por favor localizar al portador de este tag NFC.\n\n` +
+          `🩸 Tipo de sangre: O+\n` +
+          `⚠️ Alergias: Penicilina, Sulfas, Látex\n\n` +
+          `_Moteros Unidos Estado de México — Sistema de Emergencia_`
+        );
+        document.getElementById('whatsapp-link').href =
+          `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+      });
+    }
+  });
+</script>
+</body>
+</html>
