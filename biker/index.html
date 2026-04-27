@@ -341,10 +341,10 @@
 
   <div class="alert-section">
     <button class="alert-btn" id="alert-btn">
-      <span>🚨</span>
-      ALERTAR A SU FAMILIA
+      <span id="alert-icon">🚨</span>
+      <span id="alert-label">ALERTAR A SU FAMILIA</span>
     </button>
-    <div class="alert-sub">
+    <div class="alert-sub" id="alert-sub">
       Enviará ubicación actual + alerta de accidente<br>a familiar y moto club vía WhatsApp
     </div>
   </div>
@@ -353,7 +353,7 @@
 
 </div>
 
-<!-- MODAL -->
+<!-- MODAL CONFIRMACIÓN -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-icon">🚨</div>
@@ -362,9 +362,50 @@
       Se enviará un mensaje de emergencia con la ubicación actual.
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('active')">CANCELAR</button>
-      <a class="btn-confirm" id="whatsapp-link" href="#" target="_blank" onclick="document.getElementById('modal').classList.remove('active')">
+      <button class="btn-cancel" id="btn-cancelar" onclick="document.getElementById('modal').classList.remove('active')">CANCELAR</button>
+      <button class="btn-confirm" id="btn-confirmar" onclick="confirmarAlerta()">
         ENVIAR ALERTA
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIANDO -->
+<div class="modal-overlay" id="modal-enviando">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:14px;animation:pulse 1s infinite">📡</div>
+    <div class="modal-title" id="enviando-titulo">OBTENIENDO UBICACIÓN</div>
+    <div class="modal-text" id="enviando-texto">Espera un momento, estamos localizando al motero...</div>
+  </div>
+</div>
+
+<!-- MODAL ÉXITO -->
+<div class="modal-overlay" id="modal-exito">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:14px">✅</div>
+    <div class="modal-title" style="color:#5DBF7A">¡ALERTA ENVIADA!</div>
+    <div class="modal-text">
+      El familiar y el moto club han sido notificados.<br>
+      La ayuda está en camino.
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn-cancel" style="width:100%" onclick="document.getElementById('modal-exito').classList.remove('active')">CERRAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ERROR -->
+<div class="modal-overlay" id="modal-error-alerta">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:14px">⚠️</div>
+    <div class="modal-title" style="color:#E8847B">ERROR AL ENVIAR</div>
+    <div class="modal-text" id="error-alerta-texto">
+      No se pudo enviar la alerta. Intenta de nuevo o llama directamente.
+    </div>
+    <div style="margin-top:8px;display:flex;gap:10px">
+      <button class="btn-cancel" style="flex:1" onclick="document.getElementById('modal-error-alerta').classList.remove('active')">CERRAR</button>
+      <a class="btn-confirm" id="fallback-wa" href="#" target="_blank" style="flex:2;text-decoration:none">
+        ABRIR WHATSAPP
       </a>
     </div>
   </div>
@@ -374,9 +415,9 @@
 // ─────────────────────────────────────────────────────
 //  ⚙️  CONFIGURACIÓN — reemplaza con tus datos reales
 // ─────────────────────────────────────────────────────
-const SUPABASE_URL     = 'https://borrwckzjmnvzfbprvfk.supabase.co';
-const SUPABASE_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvcnJ3Y2t6am1udnpmYnBydmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTQwNTQsImV4cCI6MjA5MjQ3MDA1NH0.7mmsdqazcg608u2XYA8nz7xU9-cSR11LZwBHbVy93kM';
-const WHATSAPP_GATEWAY = '5215535977497'; // número de Make o CallMeBot
+const SUPABASE_URL  = 'https://borrwckzjmnvzfbprvfk.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvcnJ3Y2t6am1udnpmYnBydmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTQwNTQsImV4cCI6MjA5MjQ3MDA1NH0.7mmsdqazcg608u2XYA8nz7xU9-cSR11LZwBHbVy93kM';
+const MAKE_WEBHOOK  = 'https://hook.us2.make.com/wm3rfby2t9opqlgiui2ia84leajhz9um'; // URL de Make
 // ─────────────────────────────────────────────────────
 
 const { createClient } = supabase;
@@ -405,37 +446,20 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // ── Renderizar perfil ────────────────────────────────
 function renderProfile(d) {
-  // Foto
   if (d.foto_url) {
     document.getElementById('photo-frame').innerHTML =
       `<img src="${d.foto_url}" alt="Foto de ${d.nombre}">`;
   }
-
-  // Nombre y alias
   document.getElementById('b-nombre').textContent = d.nombre || '—';
-  if (d.apodo) {
-    document.getElementById('b-apodo').textContent = `Conocido como: "${d.apodo}"`;
-  }
-  if (d.club_nombre) {
-    document.getElementById('b-club').textContent = d.club_nombre;
-  }
-
-  // Sangre
+  if (d.apodo) document.getElementById('b-apodo').textContent = `Conocido como: "${d.apodo}"`;
+  if (d.club_nombre) document.getElementById('b-club').textContent = d.club_nombre;
   document.getElementById('b-sangre').textContent = d.tipo_sangre || '—';
-  if (d.donador) {
-    document.getElementById('b-donador').style.display = 'block';
-  }
+  if (d.donador) document.getElementById('b-donador').style.display = 'block';
 
-  // Alergias
-  renderChips('b-alergias', d.alergias, 'tag-danger', 'sec-alergias');
-
-  // Medicamentos
+  renderChips('b-alergias',     d.alergias,     'tag-danger',  'sec-alergias');
   renderChips('b-medicamentos', d.medicamentos, 'tag-warning', 'sec-medicamentos');
+  renderChips('b-enfermedades', d.enfermedades, 'tag-info',    'sec-enfermedades');
 
-  // Enfermedades
-  renderChips('b-enfermedades', d.enfermedades, 'tag-info', 'sec-enfermedades');
-
-  // Datos generales
   const generales = document.getElementById('b-generales');
   if (d.edad)     generales.innerHTML += row('Edad', d.edad + ' años');
   if (d.peso)     generales.innerHTML += row('Peso', d.peso + ' kg');
@@ -443,81 +467,130 @@ function renderProfile(d) {
   if (d.curp)     generales.innerHTML += row('CURP', d.curp);
   if (!generales.innerHTML) generales.innerHTML = '<span class="none-text">Sin datos registrados</span>';
 
-  // Contacto
   document.getElementById('b-familiar-nombre').textContent = d.familiar_nombre || '—';
   document.getElementById('b-familiar-tel').textContent    = d.familiar_tel    || '—';
   document.getElementById('b-club-nombre').textContent     = d.club_nombre     || '—';
   document.getElementById('b-club-tel').textContent        = d.club_tel        || '—';
 
-  // Nota paramédico
   if (d.nota_paramedico) {
     document.getElementById('b-nota').textContent = d.nota_paramedico;
     document.getElementById('nota-wrap').style.display = 'block';
   }
 
-  // Modal texto
   document.getElementById('modal-text').innerHTML =
-    `Se enviará un mensaje de emergencia con la ubicación actual a la familia y moto club de <strong style="color:var(--text)">${d.nombre}</strong>.`;
+    `Se enviará alerta de emergencia con ubicación GPS a la familia y moto club de <strong style="color:var(--text)">${d.nombre}</strong> vía WhatsApp.`;
 
-  // Mostrar contenido
   document.getElementById('loading').style.display = 'none';
   document.getElementById('main').style.display = 'block';
 
-  // Botón alerta
-  document.getElementById('alert-btn').addEventListener('click', prepareAlert);
+  document.getElementById('alert-btn').addEventListener('click', () => {
+    document.getElementById('modal').classList.add('active');
+  });
 }
 
 function row(key, val) {
   return `<div class="info-row"><span class="key">${key}</span><span class="val">${val}</span></div>`;
 }
 
-function renderChips(containerId, arr, cssClass, sectionId) {
+function renderChips(containerId, arr, cssClass) {
   const container = document.getElementById(containerId);
   if (!arr || arr.length === 0) {
     container.innerHTML = '<span class="none-text">Ninguna registrada</span>';
     return;
   }
-  container.innerHTML = arr.map(item =>
-    `<span class="tag ${cssClass}">${item}</span>`
-  ).join('');
+  container.innerHTML = arr.map(i => `<span class="tag ${cssClass}">${i}</span>`).join('');
 }
 
-// ── Alerta WhatsApp ──────────────────────────────────
-function prepareAlert() {
-  document.getElementById('modal').classList.add('active');
+// ── CONFIRMAR Y ENVIAR A MAKE ────────────────────────
+function confirmarAlerta() {
+  document.getElementById('modal').classList.remove('active');
+  document.getElementById('modal-enviando').classList.add('active');
 
-  const d = bikerData;
-  const alergias = (d.alergias && d.alergias.length) ? d.alergias.join(', ') : 'Ninguna';
-
-  const buildMsg = (ubicacion) => encodeURIComponent(
-    `🚨 *ALERTA DE ACCIDENTE — MOTEROS UNIDOS*\n\n` +
-    `El motero *${d.nombre}* ha tenido un accidente y necesita ayuda urgente.\n\n` +
-    `📍 *Ubicación:*\n${ubicacion}\n\n` +
-    `🩸 Tipo de sangre: *${d.tipo_sangre || 'Desconocido'}*\n` +
-    `⚠️ Alergias: ${alergias}\n` +
-    (d.medicamentos && d.medicamentos.length ? `💊 Medicamentos: ${d.medicamentos.join(', ')}\n` : '') +
-    `\n_Moteros Unidos Estado de México — Sistema de Emergencia_`
-  );
+  setEnviandoEstado('📡', 'OBTENIENDO UBICACIÓN', 'Localizando al motero, espera un momento...');
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const lat = pos.coords.latitude.toFixed(6);
         const lng = pos.coords.longitude.toFixed(6);
-        const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
-        document.getElementById('whatsapp-link').href =
-          `https://wa.me/${WHATSAPP_GATEWAY}?text=${buildMsg(mapsLink)}`;
+        enviarAMake(lat, lng, `https://maps.google.com/?q=${lat},${lng}`);
       },
       () => {
-        document.getElementById('whatsapp-link').href =
-          `https://wa.me/${WHATSAPP_GATEWAY}?text=${buildMsg('📵 Ubicación no disponible — localizar al portador del tag NFC')}`;
+        // Sin GPS — enviar igual sin ubicación
+        enviarAMake(null, null, null);
       },
-      { timeout: 5000 }
+      { timeout: 6000, enableHighAccuracy: true }
     );
   } else {
-    document.getElementById('whatsapp-link').href =
-      `https://wa.me/${WHATSAPP_GATEWAY}?text=${buildMsg('📵 Ubicación no disponible')}`;
+    enviarAMake(null, null, null);
   }
+}
+
+async function enviarAMake(lat, lng, mapsUrl) {
+  setEnviandoEstado('📤', 'ENVIANDO ALERTA', 'Notificando al familiar y moto club...');
+
+  const d = bikerData;
+
+  const payload = {
+    // Datos del biker
+    nombre:          d.nombre,
+    apodo:           d.apodo        || '',
+    tipo_sangre:     d.tipo_sangre  || '',
+    alergias:        (d.alergias    || []).join(', ') || 'Ninguna',
+    medicamentos:    (d.medicamentos|| []).join(', ') || 'Ninguno',
+    enfermedades:    (d.enfermedades|| []).join(', ') || 'Ninguna',
+    nota_paramedico: d.nota_paramedico || '',
+    // Contactos
+    familiar_nombre: d.familiar_nombre || '',
+    familiar_tel:    d.familiar_tel    || '',
+    club_nombre:     d.club_nombre     || '',
+    club_tel:        d.club_tel        || '',
+    // Ubicación
+    latitud:         lat,
+    longitud:        lng,
+    maps_url:        mapsUrl || 'Ubicación no disponible',
+    // Metadata
+    timestamp:       new Date().toISOString(),
+    biker_id:        bikerId,
+    perfil_url:      window.location.href,
+  };
+
+  try {
+    const res = await fetch(MAKE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    document.getElementById('modal-enviando').classList.remove('active');
+
+    if (res.ok || res.status === 200) {
+      document.getElementById('modal-exito').classList.add('active');
+    } else {
+      throw new Error('Error HTTP ' + res.status);
+    }
+  } catch (err) {
+    document.getElementById('modal-enviando').classList.remove('active');
+
+    // Fallback: abrir WhatsApp manual si Make falla
+    const msg = encodeURIComponent(
+      `🚨 *ALERTA DE ACCIDENTE — MOTEROS UNIDOS*\n\n` +
+      `El motero *${d.nombre}* ha tenido un accidente.\n\n` +
+      `📍 ${payload.maps_url}\n` +
+      `🩸 Sangre: ${d.tipo_sangre}\n` +
+      `⚠️ Alergias: ${payload.alergias}`
+    );
+    document.getElementById('fallback-wa').href =
+      `https://wa.me/${d.familiar_tel.replace(/\D/g,'')}?text=${msg}`;
+    document.getElementById('error-alerta-texto').textContent =
+      'No se pudo conectar con el servidor. Puedes abrir WhatsApp manualmente para alertar al familiar.';
+    document.getElementById('modal-error-alerta').classList.add('active');
+  }
+}
+
+function setEnviandoEstado(icon, titulo, texto) {
+  document.getElementById('enviando-titulo').textContent = titulo;
+  document.getElementById('enviando-texto').textContent  = texto;
 }
 
 function showError() {
