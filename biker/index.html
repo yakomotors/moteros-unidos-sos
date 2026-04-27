@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -359,11 +362,25 @@
     <div class="modal-icon">🚨</div>
     <div class="modal-title">Confirmar alerta</div>
     <div class="modal-text" id="modal-text">
-      Se enviará un mensaje de emergencia con la ubicación actual.
+      Se enviará alerta de emergencia con ubicación GPS a la familia y moto club.
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:7px;text-align:left">
+        📞 TU NÚMERO DE TELÉFONO <span style="color:var(--text-muted);font-size:10px">(para que puedan llamarte)</span>
+      </label>
+      <input
+        type="tel"
+        id="testigo-tel"
+        placeholder="Ej. +52 55 1234 5678"
+        style="width:100%;background:var(--surface2);border:1px solid rgba(201,168,76,0.4);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;padding:11px 14px;border-radius:3px;outline:none;"
+      >
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:left">
+        El familiar del motero podrá contactarte para coordinar el auxilio.
+      </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" id="btn-cancelar" onclick="document.getElementById('modal').classList.remove('active')">CANCELAR</button>
-      <button class="btn-confirm" id="btn-confirmar" onclick="confirmarAlerta()">
+      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('active')">CANCELAR</button>
+      <button class="btn-confirm" onclick="confirmarAlerta()">
         ENVIAR ALERTA
       </button>
     </div>
@@ -531,6 +548,8 @@ async function enviarAMake(lat, lng, mapsUrl) {
 
   const d = bikerData;
 
+  const testigoTel = document.getElementById('testigo-tel').value.trim();
+
   const payload = {
     // Datos del biker
     nombre:          d.nombre,
@@ -545,6 +564,8 @@ async function enviarAMake(lat, lng, mapsUrl) {
     familiar_tel:    d.familiar_tel    || '',
     club_nombre:     d.club_nombre     || '',
     club_tel:        d.club_tel        || '',
+    // Testigo / quien reporta
+    testigo_tel:     testigoTel || 'No proporcionado',
     // Ubicación
     latitud:         lat,
     longitud:        lng,
