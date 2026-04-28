@@ -285,7 +285,7 @@
 
   <!-- FOTO -->
   <div class="form-section">
-    <div class="section-header">📷 Foto de Biker</div>
+    <div class="section-header">📷 Foto de identificación</div>
     <div class="section-body">
       <div class="photo-upload" id="photo-upload-area">
         <input type="file" accept="image/*" id="photo-input" onchange="previewPhoto(this)">
@@ -459,7 +459,7 @@
       </div>
       <div style="font-size:13px;color:var(--text-muted);margin-top:10px;line-height:1.7;">
         Tu ficha de emergencia ya está lista.<br>
-        Tu presidente tendra que activar tu etiqueta y te la entregara.
+        El presidente del club la activará y te entregará tu tag NFC personalizado.
       </div>
     </div>
   </div>
@@ -469,10 +469,10 @@
 // ─────────────────────────────────────────────
 //  CONFIGURACIÓN — reemplaza con tus datos reales
 // ─────────────────────────────────────────────
-const SUPABASE_URL = 'https://borrwckzjmnvzfbprvfk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvcnJ3Y2t6am1udnpmYnBydmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTQwNTQsImV4cCI6MjA5MjQ3MDA1NH0.7mmsdqazcg608u2XYA8nz7xU9-cSR11LZwBHbVy93kM';
-const SITE_URL     = 'https://moterosunidos.com';  // tu dominio
-
+const SUPABASE_URL  = 'https://borrwckzjmnvzfbprvfk.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvcnJ3Y2t6am1udnpmYnBydmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTQwNTQsImV4cCI6MjA5MjQ3MDA1NH0.7mmsdqazcg608u2XYA8nz7xU9-cSR11LZwBHbVy93kM';
+const SITE_URL      = 'https://moterosunidos.com';       // tu dominio
+const MAKE_WEBHOOK  = 'https://hook.us2.make.com/wm3rfby2t9opqlgiui2ia84leajhz9um'; // webhook de registro en Make
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -596,6 +596,30 @@ async function submitForm() {
   }
 
   // ── Éxito ──
+  // Notificar a Make que un nuevo biker se registró
+  const perfilUrl = `${SITE_URL}/biker/?id=${bikerId}`;
+  try {
+    await fetch(MAKE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        evento:         'nuevo_registro',
+        biker_id:       bikerId,
+        nombre:         document.getElementById('nombre').value.trim(),
+        apodo:          document.getElementById('apodo').value.trim() || 'Sin apodo',
+        tipo_sangre:    document.getElementById('tipo_sangre').value,
+        club_nombre:    document.getElementById('club_nombre').value.trim(),
+        familiar_nombre:document.getElementById('familiar_nombre').value.trim(),
+        familiar_tel:   document.getElementById('familiar_tel').value.trim(),
+        perfil_url:     perfilUrl,
+        timestamp:      new Date().toISOString(),
+      })
+    });
+  } catch (e) {
+    // Si Make falla no bloqueamos al usuario, el registro ya quedó en Supabase
+    console.warn('Make webhook falló:', e);
+  }
+
   document.getElementById('main-form').style.display = 'none';
   document.getElementById('submit-section').style.display = 'none';
   document.getElementById('success-panel').style.display = 'block';
